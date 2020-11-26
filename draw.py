@@ -1,3 +1,5 @@
+import base64
+
 from config import *
 import utils as ut
 
@@ -117,11 +119,23 @@ class Profile(object):
         self.id = id
 
     def decode(self):
-        profile_image = cv2.imdecode(np.fromstring(self.encoded_profile_image.read(), np.int8), 1)
-        license_plate_image = cv2.imdecode(np.fromstring(self.encoded_license_plate_image.read(), np.int8), 1)
+        if self.encoded_profile_image.startswith('data'):
+            encoded_data = self.encoded_profile_image.split(',')[1]
+        else:
+            encoded_data = self.encoded_profile_image
+        np_array = np.fromstring(base64.b64decode(encoded_data), np.uint8)
+        profile_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+
+        if self.encoded_license_plate_image.startswith('data'):
+            encoded_data = self.encoded_license_plate_image.split(',')[1]
+        else:
+            encoded_data = self.encoded_license_plate_image
+        np_array = np.fromstring(base64.b64decode(encoded_data), np.uint8)
+        license_plate_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+
         height, width, channels = profile_image.shape
-        resized_license_plate_image = cv2.resize(license_plate_image, (width/4, height/4), interpolation=cv2.INTER_AREA)
-        profile_image[0:height/4, 0:width/4] = resized_license_plate_image
+        resized_license_plate_image = cv2.resize(license_plate_image, (width/3, height/3), interpolation=cv2.INTER_AREA)
+        profile_image[0:height/3, 0:width/3] = resized_license_plate_image
         self.img = profile_image
         if self.is_landscape != 1:
             self.img = cv2.transpose(self.img)

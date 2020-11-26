@@ -50,8 +50,8 @@ def display():
         logging.info('request={}, laneid={}, id={}, is_landscape={}'.format(request, lane_id, id, is_landscape))
         if (id != 'Unknown'):
             title=request.values.get('title', '')
-            encoded_profile_image=request.files['profile_image']
-            encoded_license_plate_image=request.files['license_plate_image']
+            encoded_profile_image=request.values['profile_image']
+            encoded_license_plate_image=request.values['license_plate_image']
 
             hnd.add(Profile(encoded_profile_image, encoded_license_plate_image, lane_id, id, title, is_landscape))
     except Exception as ex:

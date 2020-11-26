@@ -46,6 +46,6 @@ PI_CF_TABLES = {
     'demo_myanma': {
         # B1 floor
         12: {'cam_ip': 2, 'server': 20, 'roi_translation': (0, 0.05)},
-        13: {'cam_ip': 3, 'server': 20, 'roi_translation': (0, 0.05)},
+        13: {'cam_ip': 84, 'server': 234, 'roi_translation': (0, 0.05)},
     },
 }

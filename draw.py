@@ -107,16 +107,22 @@ def draw_profiles(img, requests):
             draw_profile(img, 'bl', llane[1])
 
 class Profile(object):
-    def __init__(self, encoded_img_filestream, lane_id, id, title = '', is_landscape=1):
+    def __init__(self, encoded_profile_image, encoded_license_plate_image, lane_id, id, title = '', is_landscape=1):
         self.is_landscape = is_landscape
         self.title = title
         self.lane_id = lane_id
-        self.encoded_img_filestream = encoded_img_filestream
+        self.encoded_profile_image = encoded_profile_image
+        self.encoded_license_plate_image = encoded_license_plate_image
         self.img = None
         self.id = id
 
     def decode(self):
-        self.img = cv2.imdecode(np.fromstring(self.encoded_img_filestream.read(), np.int8), 1)
+        profile_image = cv2.imdecode(np.fromstring(self.encoded_profile_image.read(), np.int8), 1)
+        license_plate_image = cv2.imdecode(np.fromstring(self.encoded_license_plate_image.read(), np.int8), 1)
+        height, width, channels = profile_image.shape
+        resized_license_plate_image = cv2.resize(license_plate_image, (width/4, height/4), interpolation=cv2.INTER_AREA)
+        profile_image[0:height/4, 0:width/4] = resized_license_plate_image
+        self.img = profile_image
         if self.is_landscape != 1:
             self.img = cv2.transpose(self.img)
 

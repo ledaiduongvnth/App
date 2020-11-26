@@ -50,8 +50,10 @@ def display():
         logging.info('request={}, laneid={}, id={}, is_landscape={}'.format(request, lane_id, id, is_landscape))
         if (id != 'Unknown'):
             title=request.values.get('title', '')
-            encoded_img_filestream=request.files['profile_image']
-            hnd.add(Profile(encoded_img_filestream, lane_id, id, title, is_landscape))
+            encoded_profile_image=request.files['profile_image']
+            encoded_license_plate_image=request.files['license_plate_image']
+
+            hnd.add(Profile(encoded_profile_image, encoded_license_plate_image, lane_id, id, title, is_landscape))
     except Exception as ex:
         ut.handle_exception(ex)
 
@@ -92,7 +94,7 @@ def runScreenRendererThread():
                 cv2.imshow(' ', img)
             else:
                 time.sleep(0.01)
-            key = cv2.waitKey(1)
+            key = cv2.waitKey(4000)
             if key % 256 == 27: # press esc
                 finished = True
         except Exception as ex:
@@ -159,7 +161,7 @@ def runImageRendererThread():
                 if (os.path.exists(screen_file)):
                     screen = cv2.imread(screen_file)
                     cv2.imshow('', screen)
-                    cv2.waitKey(1)
+                    cv2.waitKey(4000)
 
         except Exception as ex:
             ut.handle_exception(ex)
@@ -279,6 +281,6 @@ if __name__ == '__main__':
         Thread(target=runCamGrabberThread).start()
         Thread(target=runScreenRendererThread).start()
 
-    Thread(target=runMessageThread).start()
+#    Thread(target=runMessageThread).start()
 
     start_tornado(app, 5000)

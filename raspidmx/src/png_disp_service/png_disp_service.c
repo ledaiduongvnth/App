@@ -321,9 +321,9 @@ int main(int argc, char *argv[])
 
                 cnt += 1;
                 printf("Loaded file %s  cnt %d\n", img_path, cnt);
+                usleep(3000000);
             }
         }
-
         usleep(1000);
     }
 

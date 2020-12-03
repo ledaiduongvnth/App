@@ -3,10 +3,10 @@ import base64
 
 url = 'http://10.61.212.13:5000/display'
 
-with open('/home/d/Pictures/Screenshot from 2020-11-20 15-10-40.png', 'rb') as f1:
+with open('/home/d/Pictures/proto/photo_test.png', 'rb') as f1:
     f1_bytes = f1.read()
 
-with open('/home/d/Pictures/Screenshot from 2020-11-20 15-10-40.png', 'rb') as f2:
+with open('/home/d/Pictures/proto/photo_test.png', 'rb') as f2:
     f2_bytes = f2.read()
 
 data = {

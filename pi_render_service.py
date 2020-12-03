@@ -4,8 +4,6 @@ from flask import *
 
 import optparse
 from threading import Thread
-from Queue import Queue
-
 from draw import *
 import utils as ut
 import os
@@ -22,7 +20,6 @@ CAM_URL_TEMPLATES = [
 ]
 
 app = Flask(__name__)
-q = Queue(1)
 hnd = DisplayRequestHandle()
 
 def start_tornado(app, port):
@@ -60,51 +57,6 @@ def display():
         ut.handle_exception(ex)
 
     return jsonify(success = True)
-
-
-def runCamGrabberThread():
-    global q, finished
-    cap = cv2.VideoCapture(cam_service_url)
-    cnt=0
-    while finished is False:
-        t0 = time.time()
-        try:
-            ret, cv_img = cap.read()
-            if cv_img is not None:
-                if not q.full():
-                    q.put(cv_img.copy())
-            else:
-                cnt, cap = ut.handle_cam_disconnected(cam_service_url, cap, cnt)
-        except Exception as ex:
-            ut.handle_exception(ex)
-
-        ut.limit_fps_by_sleep(25, t0)
-
-    cap.release()
-        
-
-def runScreenRendererThread():
-    global q, finished
-    cv2.namedWindow(' ', cv2.WINDOW_AUTOSIZE)
-    while finished is False:
-        t0 = time.time()
-        try:
-            if not q.empty():
-                img = q.get()
-                img = cv2.resize(img, (SCREEN_W, SCREEN_H))
-                hnd.render(img)
-                cv2.imshow(' ', img)
-            else:
-                time.sleep(0.01)
-            key = cv2.waitKey(4000)
-            if key % 256 == 27: # press esc
-                finished = True
-        except Exception as ex:
-            ut.handle_exception(ex)
-
-        ut.limit_fps_by_sleep(MAX_FPS, t0)
-
-    cv2.destroyAllWindows()
 
 
 def make_screen_img(left_img, right_img):
@@ -171,81 +123,6 @@ def runImageRendererThread():
         ut.limit_fps_by_sleep(MAX_FPS, t0)
 
 
-def runMessageThread():
-    startup_screen = make_screen_img(None, None)
-    has_error = False
-    has_error_old = has_error
-    no_door = False
-    no_server = False
-    while True:
-        t0 = time.time()
-        screen_update = False
-        try:
-            if ut.get_config('door') is not None:
-                no_door = not ut.ping(door_ip)
-
-            if ut.get_config('server') is not None:
-                no_server = not ut.ping(server_ip)
-
-            no_cam = not ut.ping(cam_ip)
-            screen = None
-
-            if no_door or no_cam or no_server or len(NOTICE_LINES) > 0:
-                screen = np.zeros((SCREEN_H, SCREEN_W, 4), dtype=np.uint8)
-                screen[:, :, 3] = 127  # make error screen semi-visible
-
-            if no_door or no_cam or no_server:
-                has_error = True
-                draw_unicode(screen, COMMON_ERROR_HANDLING, (10, 10), max_w=1200)
-                draw_unicode(screen, COMMON_ERROR, (10, 100), max_w=1200)
-                if no_cam:
-                    draw_unicode(screen, CONNECTION_LOSS_CAM, (10, 160), max_w=1200)
-                    screen_update = True
-
-                if no_door:
-                    draw_unicode(screen, CONNECTION_LOSS_DOOR, (10, 220), max_w=1200)
-                    screen_update = True
-
-                if no_server:
-                    draw_unicode(screen, CONNECTION_LOSS_SERVER, (10, 280), max_w=1200)
-                    screen_update = True
-            else:
-                has_error = False
-                # Detect first back from error then show startup screen
-                if has_error_old and not has_error:
-                    screen = startup_screen
-                    screen_update = True
-
-                for i in range(len(NOTICE_LINES)):
-                    if NOTICE_LINES[i]:
-                        draw_unicode(screen, NOTICE_LINES[i], (10, 360 + i * 40), max_w=1200, small_font=True)
-                        screen_update = True
-
-            if screen_update:
-                try:
-                    cv2.imwrite(screen_file, screen)
-                    write_error = False
-                except Exception as ex:
-                    ut.handle_exception(ex)
-                    write_error = True
-
-                if not write_error:
-                    # notify the png display service
-                    try:
-                        with open(screen_file + '.hk.log', 'w') as f:
-                            f.write('OK\n')
-                            logger.info('notify file health check OK')
-                    except Exception as ex:
-                        ut.handle_exception(ex)
-
-            has_error_old = has_error
-
-        except Exception as ex:
-            ut.handle_exception(ex)
-
-        ut.limit_fps_by_sleep(0.1, t0)
-
-
 if __name__ == '__main__':
 
     parser = optparse.OptionParser()
@@ -279,10 +156,5 @@ if __name__ == '__main__':
 
     if render_image:
         Thread(target=runImageRendererThread).start()
-    else:
-        Thread(target=runCamGrabberThread).start()
-        Thread(target=runScreenRendererThread).start()
-
-#    Thread(target=runMessageThread).start()
 
     start_tornado(app, 5000)

@@ -120,19 +120,25 @@ class Profile(object):
         self.status = status
 
     def decode(self):
-        if self.encoded_profile_image.startswith('data'):
-            encoded_data = self.encoded_profile_image.split(',')[1]
-        else:
-            encoded_data = self.encoded_profile_image
-        np_array = np.fromstring(base64.b64decode(encoded_data), np.uint8)
-        profile_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+        try:
+            if self.encoded_profile_image.startswith('data'):
+                encoded_data = self.encoded_profile_image.split(',')[1]
+            else:
+                encoded_data = self.encoded_profile_image
+            np_array = np.fromstring(base64.b64decode(encoded_data), np.uint8)
+            profile_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+        except:
+            profile_image = np.zeros((500, 500, 3), dtype = "uint8")
 
-        if self.encoded_license_plate_image.startswith('data'):
-            encoded_data = self.encoded_license_plate_image.split(',')[1]
-        else:
-            encoded_data = self.encoded_license_plate_image
-        np_array = np.fromstring(base64.b64decode(encoded_data), np.uint8)
-        license_plate_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+        try:
+            if self.encoded_license_plate_image.startswith('data'):
+                encoded_data = self.encoded_license_plate_image.split(',')[1]
+            else:
+                encoded_data = self.encoded_license_plate_image
+            np_array = np.fromstring(base64.b64decode(encoded_data), np.uint8)
+            license_plate_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+        except:
+            license_plate_image = np.zeros((500, 500, 3), dtype = "uint8")
 
         height, width, channels = license_plate_image.shape
         resized_profile_image = cv2.resize(profile_image, (width/3, height/3), interpolation=cv2.INTER_AREA)
@@ -156,24 +162,11 @@ class DisplayRequestHandle(object):
         self.lock = threading.Lock()
 
     def add(self, profile):
-        existed = False
-        t0 = time.time()
-
-        #print('add get lock')
+        profile.decode()
+        request = DisplayRequest(profile)
         self.lock.acquire()
-        for r in self.requests:
-            if r.profile.message == profile.message and r.profile.lane_id == profile.lane_id:
-                r.start_time = t0
-                existed = True
+        self.requests.append(request)
         self.lock.release()
-        #print('release lock')
-
-        if not existed:
-            profile.decode()
-            request = DisplayRequest(profile)
-            self.lock.acquire()
-            self.requests.append(request)
-            self.lock.release()
 
     def _get_content_hash(self):
         return ' '.join([r.profile.message for r in self.requests])
@@ -185,7 +178,6 @@ class DisplayRequestHandle(object):
         #print('check update get lock')
         self.lock.acquire()
         self.requests = [r for r in self.requests if now - r.start_time < PROFILE_DISPLAY_MAX_TTL]
-        self.requests.sort(key=lambda x: x.profile.message)
         self.lock.release()
         #print('check update release lock')
 
@@ -243,6 +235,7 @@ class DisplayRequestHandle(object):
         rimg = None
         if self._has_right_content:
             rimg = img[:,w/2:w,:]
+
 
         draw_profiles(img, self.requests)
 

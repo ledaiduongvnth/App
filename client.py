@@ -10,7 +10,7 @@ with open('/home/d/Pictures/license_plate.jpg', 'rb') as f2:
     f2_bytes = f2.read()
 
 data = {
-    "status" : "OK",
+    "status" : "STOP",
     "message": "sfgfdgfghghghgfdgdgdfgdfg",
     "lane_id": "R",
     "is_landscape": "1",

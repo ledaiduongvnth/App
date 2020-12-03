@@ -53,7 +53,7 @@ def get_profile_cell(w, h, profile, border_thickness = 3, bg_color=COLOR_OK):
     offset_x-border_thickness:(offset_x + profile_size)+3, :] = (255, 255, 255)
 
     if profile.title:
-        draw_unicode(rs, profile.id, (offset_x, offset_y + profile_size + 10), max_w=500)
+        draw_unicode(rs, profile.message, (offset_x, offset_y + profile_size + 10), max_w=500)
         draw_unicode(rs, profile.title, (offset_x, offset_y + profile_size + 65), max_w=500, small_font=True)
 
     #print profile.img.shape
@@ -68,7 +68,7 @@ def draw_profile(img, position_code, profile):
     h = img.shape[0]
 
     bg_color = COLOR_OK
-    if profile.id == "STOP":
+    if profile.status == "STOP":
         bg_color = COLOR_EXCEPTION
 
     def get_cell(w, h):
@@ -93,7 +93,7 @@ def draw_profiles(img, requests):
 
     # display only 2 oldest profile requests max -> 2 closest people
     if (rlane != None):
-        rlane.sort(key=lambda x: x.id)
+        rlane.sort(key=lambda x: x.message)
         if (len(rlane) == 1):
             draw_profile(img, 'r', rlane[0])
         if (len(rlane) > 1):
@@ -101,7 +101,7 @@ def draw_profiles(img, requests):
             draw_profile(img, 'br', rlane[1])
 
     if (llane != None):
-        llane.sort(key=lambda x: x.id)
+        llane.sort(key=lambda x: x.message)
         if (len(llane) == 1):
             draw_profile(img, 'l', llane[0])
         if (len(llane) > 1):
@@ -109,14 +109,15 @@ def draw_profiles(img, requests):
             draw_profile(img, 'bl', llane[1])
 
 class Profile(object):
-    def __init__(self, encoded_profile_image, encoded_license_plate_image, lane_id, id, title = '', is_landscape=1):
+    def __init__(self, encoded_profile_image, encoded_license_plate_image, status, lane_id, message, title ='', is_landscape=1):
         self.is_landscape = is_landscape
         self.title = title
         self.lane_id = lane_id
         self.encoded_profile_image = encoded_profile_image
         self.encoded_license_plate_image = encoded_license_plate_image
         self.img = None
-        self.id = id
+        self.message = message
+        self.status = status
 
     def decode(self):
         if self.encoded_profile_image.startswith('data'):
@@ -161,7 +162,7 @@ class DisplayRequestHandle(object):
         #print('add get lock')
         self.lock.acquire()
         for r in self.requests:
-            if r.profile.id == profile.id and r.profile.lane_id == profile.lane_id:
+            if r.profile.message == profile.message and r.profile.lane_id == profile.lane_id:
                 r.start_time = t0
                 existed = True
         self.lock.release()
@@ -175,7 +176,7 @@ class DisplayRequestHandle(object):
             self.lock.release()
 
     def _get_content_hash(self):
-        return ' '.join([r.profile.id for r in self.requests])
+        return ' '.join([r.profile.message for r in self.requests])
 
     def check_update(self):
         now = time.time()
@@ -184,7 +185,7 @@ class DisplayRequestHandle(object):
         #print('check update get lock')
         self.lock.acquire()
         self.requests = [r for r in self.requests if now - r.start_time < PROFILE_DISPLAY_MAX_TTL]
-        self.requests.sort(key=lambda x: x.profile.id)
+        self.requests.sort(key=lambda x: x.profile.message)
         self.lock.release()
         #print('check update release lock')
 

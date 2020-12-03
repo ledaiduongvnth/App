@@ -6,11 +6,12 @@ url = 'http://10.61.212.13:5000/display'
 with open('/home/d/Pictures/proto/photo_test.png', 'rb') as f1:
     f1_bytes = f1.read()
 
-with open('/home/d/Pictures/proto/photo_test.png', 'rb') as f2:
+with open('/home/d/Pictures/license_plate.jpg', 'rb') as f2:
     f2_bytes = f2.read()
 
 data = {
-    "id": "id",
+    "status" : "OK",
+    "message": "sfgfdgfghghghgfdgdgdfgdfg",
     "lane_id": "R",
     "is_landscape": "1",
     "title": "title",

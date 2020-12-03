@@ -12,8 +12,8 @@ def not_null_roi(tl, br):
 
 
 def get_default_roi(display_side, img_w = SCREEN_W, img_h = SCREEN_H, roi_translation=(0,0), l_roi_w_ratio=0.5):
-    offset_w = img_w / 10
-    offset_h = img_h / 10
+    offset_w = img_w / 25
+    offset_h = img_h / 15
     dy = int(roi_translation[1] * img_h)
     dx = int(roi_translation[0] * img_w)
 

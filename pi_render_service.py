@@ -38,22 +38,24 @@ def start_tornado(app, port):
 def display():
     global hnd
     try:
-        id=request.values['id']
+        message=request.values['message']
         lane_id=request.values['lane_id']
         is_landscape=request.values.get('is_landscape', None)
+        status=request.values.get('status', None)
+
 
         try:
             is_landscape = int(is_landscape)
         except:
             is_landscape = 1
 
-        logging.info('request={}, laneid={}, id={}, is_landscape={}'.format(request, lane_id, id, is_landscape))
-        if (id != 'Unknown'):
+        logging.info('request={}, laneid={}, message={}, is_landscape={}'.format(request, lane_id, message, is_landscape))
+        if (message != 'Unknown'):
             title=request.values.get('title', '')
             encoded_profile_image=request.values['profile_image']
             encoded_license_plate_image=request.values['license_plate_image']
 
-            hnd.add(Profile(encoded_profile_image, encoded_license_plate_image, lane_id, id, title, is_landscape))
+            hnd.add(Profile(encoded_profile_image, encoded_license_plate_image, status, lane_id, message, title, is_landscape))
     except Exception as ex:
         ut.handle_exception(ex)
 
@@ -109,10 +111,10 @@ def make_screen_img(left_img, right_img):
     rgba = np.zeros((SCREEN_H, SCREEN_W, 4), np.uint8)
     tl, br = ut.get_default_roi('R', rgba.shape[1], rgba.shape[0], roi_translation, roi_l_w_ratio)
     if ut.not_null_roi(tl, br):
-        cv2.rectangle(rgba, tl, br, (0, 255, 0, OPACITY), 3)
+        cv2.rectangle(rgba, tl, br, (255, 255, 0, OPACITY), 3)
     tl, br = ut.get_default_roi('L', rgba.shape[1], rgba.shape[0], roi_translation, roi_l_w_ratio)
     if ut.not_null_roi(tl, br):
-        cv2.rectangle(rgba, tl, br, (0, 255, 0, OPACITY), 3)
+        cv2.rectangle(rgba, tl, br, (255, 255, 0, OPACITY), 3)
 
     if left_img is not None:
         rgba[:, 0:SCREEN_W / 2, 0:3] = left_img

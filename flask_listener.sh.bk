@@ -1,2 +1,0 @@
-#!/bin/bash
-sudo /usr/bin/python /home/pi/Desktop/App/pi_render_service.py --render_image 1

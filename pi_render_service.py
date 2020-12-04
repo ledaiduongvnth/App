@@ -46,7 +46,7 @@ def display():
         except:
             is_landscape = 1
 
-        logging.info('request={}, laneid={}, message={}, is_landscape={}'.format(request, lane_id, message, is_landscape))
+        logging.info('request={}, laneid={}, is_landscape={}'.format(request, lane_id, is_landscape))
         if (message != 'Unknown'):
             title=request.values.get('title', '')
             encoded_profile_image=request.values['profile_image']

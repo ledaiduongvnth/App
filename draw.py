@@ -120,25 +120,19 @@ class Profile(object):
         self.status = status
 
     def decode(self):
-        try:
-            if self.encoded_profile_image.startswith('data'):
-                encoded_data = self.encoded_profile_image.split(',')[1]
-            else:
-                encoded_data = self.encoded_profile_image
-            np_array = np.fromstring(base64.b64decode(encoded_data), np.uint8)
-            profile_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
-        except:
-            profile_image = np.zeros((500, 500, 3), dtype = "uint8")
+        if self.encoded_profile_image.startswith('data'):
+            encoded_data = self.encoded_profile_image.split(',')[1]
+        else:
+            encoded_data = self.encoded_profile_image
+        np_array = np.fromstring(base64.b64decode(encoded_data), np.uint8)
+        profile_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
 
-        try:
-            if self.encoded_license_plate_image.startswith('data'):
-                encoded_data = self.encoded_license_plate_image.split(',')[1]
-            else:
-                encoded_data = self.encoded_license_plate_image
-            np_array = np.fromstring(base64.b64decode(encoded_data), np.uint8)
-            license_plate_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
-        except:
-            license_plate_image = np.zeros((500, 500, 3), dtype = "uint8")
+        if self.encoded_license_plate_image.startswith('data'):
+            encoded_data = self.encoded_license_plate_image.split(',')[1]
+        else:
+            encoded_data = self.encoded_license_plate_image
+        np_array = np.fromstring(base64.b64decode(encoded_data), np.uint8)
+        license_plate_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
 
         height, width, channels = license_plate_image.shape
         resized_profile_image = cv2.resize(profile_image, (width/3, height/3), interpolation=cv2.INTER_AREA)

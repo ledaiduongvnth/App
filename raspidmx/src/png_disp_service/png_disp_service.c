@@ -321,10 +321,10 @@ int main(int argc, char *argv[])
 
                 cnt += 1;
                 printf("Loaded file %s  cnt %d\n", img_path, cnt);
-                usleep(2500000);
+//                usleep(2500000);
             }
         }
-        usleep(10);
+        usleep(1000);
     }
 
      // removing the directory from the watch list

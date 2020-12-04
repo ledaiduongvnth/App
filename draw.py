@@ -93,20 +93,18 @@ def draw_profiles(img, requests):
 
     # display only 2 oldest profile requests max -> 2 closest people
     if (rlane != None):
-        rlane.sort(key=lambda x: x.message)
         if (len(rlane) == 1):
             draw_profile(img, 'r', rlane[0])
         if (len(rlane) > 1):
-            draw_profile(img, 'tr', rlane[0])
-            draw_profile(img, 'br', rlane[1])
+            # draw_profile(img, 'tr', rlane[0])
+            draw_profile(img, 'r', rlane[-1])
 
     if (llane != None):
-        llane.sort(key=lambda x: x.message)
         if (len(llane) == 1):
             draw_profile(img, 'l', llane[0])
         if (len(llane) > 1):
-            draw_profile(img, 'tl', llane[0])
-            draw_profile(img, 'bl', llane[1])
+            # draw_profile(img, 'tl', llane[0])
+            draw_profile(img, 'l', llane[-1])
 
 class Profile(object):
     def __init__(self, encoded_profile_image, encoded_license_plate_image, status, lane_id, message, title ='', is_landscape=1):

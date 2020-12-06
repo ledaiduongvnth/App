@@ -21,6 +21,7 @@ CAM_URL_TEMPLATES = [
 
 app = Flask(__name__)
 hnd = DisplayRequestHandle()
+logo = cv2.imread("/home/pi/Desktop/App/images/Logo_Viettel.svg.png", cv2.IMREAD_COLOR)
 
 def start_tornado(app, port):
     http_server = tornado.httpserver.HTTPServer(
@@ -91,6 +92,18 @@ def runImageRendererThread():
                 img = np.zeros((SCREEN_H, SCREEN_W, 3), dtype=np.uint8)
                 l, r = hnd.render_left_right(img)
 
+                if l is not None:
+                    height, width, channels = l.shape
+                    resized_logo_image = cv2.resize(logo, (width / 5, height / 10), interpolation=cv2.INTER_AREA)
+                    l[0 + 40:height / 10 + 40, width - width / 5: width] = resized_logo_image
+
+                if r is not None:
+                    height, width, channels = r.shape
+                    resized_logo_image = cv2.resize(logo, (width / 5, height / 10), interpolation=cv2.INTER_AREA)
+                    r[0 + 40:height / 10 + 40, width - width / 5: width] = resized_logo_image
+
+
+
                 logger.info('time: {}: update screen image'.format(t0))
 
                 try:
@@ -115,7 +128,7 @@ def runImageRendererThread():
                 if (os.path.exists(screen_file)):
                     screen = cv2.imread(screen_file)
                     cv2.imshow('', screen)
-                    cv2.waitKey(4000)
+                    cv2.waitKey(1)
 
         except Exception as ex:
             ut.handle_exception(ex)

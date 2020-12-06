@@ -11,11 +11,11 @@ with open('/home/d/Pictures/license_plate.jpg', 'rb') as f2:
     f2_bytes = f2.read()
 
 
-for i in range(10):
+for i in range(1):
     data = {
         "status": "OK",
         "message": "xin chào các bạn",
-        "lane_id": "R",
+        "lane_id": "L",
         "is_landscape": "1",
         "title": str(i),
         "profile_image": base64.b64encode(f1_bytes),
